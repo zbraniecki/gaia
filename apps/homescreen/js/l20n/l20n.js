@@ -1,133 +1,137 @@
 var L20n = {
   getContext: function() {
-    return new L20n.Context();
-  },
-  _startLoading: function(res, callback) {
-    var httpRequest;
-    httpRequest = new XMLHttpRequest();
-    httpRequest.overrideMimeType('text/plain');
-    httpRequest.addEventListener("load", function() {
-      return callback(httpRequest.responseText)
-    }, false);
-    httpRequest.open('GET', res.uri, true);
-    httpRequest.send('');
-  },
-  _paths: {'sys': 'js/l20n/data/sys.j20n',
-           'globals': 'js/l20n/data/default.j20n'},
-}
-
-L20n.Resource = function(aURI) {
-  this.uri = aURI;
-}
-
-L20n.Resource.prototype = {
-  _loading: true,
-  uri: null,
-}
+    return new this.Context();
+  }
+};
 
 L20n.Context = function() {
-  mFrozen = false;
-  mResources = [];
-  mEvents = {'ready': null}
+  this.frozen = false;
 
-  mObjects = {
+  this._resources = {};
+
+  this._events = {
+    'ready': false
+  };
+
+  this._objects = {
     'resources': {},
     'context': {},
     'system': {},
-    'globals': {},
+    'globals': {}
   }
 
-  this._getObject(mObjects['system'], L20n._paths['sys']);
-  this._getObject(mObjects['globals'], L20n._paths['globals']);
+  var paths = {
+    'system': 'js/l20n/data/sys.j20n',
+    'globals': 'js/l20n/data/default.j20n'
+  };
+  
+  for (var name in paths)
+    this._loadResource(this._objects[name], paths[name]);
 }
 
 L20n.Context.prototype = {
-  addResource: function(aURI) {
-    var res = this._getObject(mObjects['resources'], aURI);
+  addResource: function(url) {
+    this._loadResource(this._objects['resources'], url);
   },
+
   get: function(id, args) {
-    var curObj = mObjects['resources'];
-    if (mObjects['context']) {
-      mObjects['context'].__proto__ = curObj;
-      curObj = mObjects['context'];
-    }
-    if (args) {
-      args.__proto__ = curObj;
-      curObj = args;
-    }
-    mObjects['globals'].__proto__ = curObj;
-    curObj = mObjects['globals'];
-    return mObjects['system'].getent(curObj, mObjects['system'], id);
+    return this._get(id, args);
   },
+
   getAttributes: function(id, args) {
-    var curObj = mObjects['resources'];
-    if (mObjects['context']) {
-      mObjects['context'].__proto__ = curObj;
-      curObj = mObjects['context'];
-    }
-    if (args) {
-      args.__proto__ = curObj;
-      curObj = args;
-    }
-    mObjects['globals'].__proto__ = curObj;
-    curObj = mObjects['globals'];
-    return mObjects['system'].getattrs(curObj, mObjects['system'], id);
+    return this._get(id, args, true);
   },
-  isFrozen: function() {
-    return mFrozen; 
+
+  set data(data) {
+    return this._objects['context'] = data
   },
+
+  get data() {
+    return this._objects['context'];
+  },
+
   freeze: function() {
-    mFrozen = true;
-    if (this.isReady()) {
-      this._fireObserver();
-    }
+    this.frozen = true;
+
+    if (this.isReady())
+      this._fireCallback();
   },
+
   isReady: function() {
-    if (!mFrozen)
+    if (!this.frozen)
       return false;
-    for (var i=0;i<mResources.length;i++) {
-      if (mResources[i]._loading)
+
+    var resources = this._resources;
+    for (var url in resources) {
+      if (resources[url])
         return false;
     }
+
     return true;
   },
-  set onReady(obs) {
-    mEvents['ready'] = obs;
-  },
-  set data(data) {
-    mObjects['context'] = data
-  },
-  get data() {
-    return mObjects['context'];
+
+  set onReady(callback) {
+    this._events['ready'] = callback;
   },
 
   // Private
-  _loadObject: function(data, obj) {
+  _get: function(id, args, isAttributes) {
+    var objects = this._objects;
+
+    var currentObject = objects['resources'];
+    if (args) {
+      args.__proto__ = currentObject;
+      currentObject = args;
+    }
+
+    if (objects['context']) {
+      objects['context'].__proto__ = currentObject;
+      currentObject = objects['context'];
+    }
+
+    objects['globals'].__proto__ = currentObject;
+    currentObject = objects['globals'];
+
+    var system = objects['system'];
+    if (isAttributes)
+      return system.getattrs(currentObject, system, id);
+    else
+      return system.getent(currentObject, system, id);
+  },
+
+  _loadObject: function(obj, data) {
+    // XXX HO MY!
     var read = function(data) {
       eval(data);
     }
     read.apply(obj, Array(data));
   },
-  _getObject: function(obj, url) {
-    var self = this;
-    var res = new L20n.Resource(url);
-    var _injectResource = function(data) {
-      self._loadObject(data, obj);
-      res._loading = false;
 
-      if (self.isReady()) {
-        self._fireObserver();
-      }
+  _loadResource: function(obj, url) {
+    this._resources[url] = true;
 
-    }
-    L20n._startLoading(res, _injectResource);
-    mResources.push(res);
+    var xhr = new XMLHttpRequest();
+    xhr.overrideMimeType('text/plain');
+
+    xhr.addEventListener('load', (function() {
+      this._loadObject(obj, xhr.responseText);
+      this._resources[url] = false;
+
+      if (this.isReady())
+        this._fireCallback();
+    }).bind(this));
+
+    xhr.open('GET', url, true);
+    xhr.send('');
   },
-  _fireObserver: function() {
-    if (mEvents['ready']) {
-      mEvents['ready']();
-      mEvents['ready'] = null;
-    }
+
+  _fireCallback: function() {
+    var callback = this._events['ready'];
+    if (!callback)
+      return;
+
+    callback();
+    this._events['ready'] = null;
   }
 }
 
