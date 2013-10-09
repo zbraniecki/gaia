@@ -412,6 +412,9 @@ endif
 webapp-optimize: install-xulrunner-sdk
 	@$(call run-js-command, webapp-optimize)
 
+webapp-strip-content: install-xulrunner-sdk
+	@$(call run-js-command, webapp-strip-content)
+
 # Remove temporary l10n files
 optimize-clean: webapp-zip install-xulrunner-sdk
 	@$(call run-js-command, optimize-clean)
