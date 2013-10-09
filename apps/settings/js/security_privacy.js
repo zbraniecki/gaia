@@ -11,7 +11,7 @@
 // display scurity status on the main panel
 var Security = {
   init: function init() {
-    var _ = navigator.mozL10n.get;
+    var _ = document.l10n.get;
     var settings = navigator.mozSettings;
     if (!settings)
       return;
@@ -65,7 +65,7 @@ var Security = {
 };
 
 // starting when we get a chance
-navigator.mozL10n.ready(function loadWhenIdle() {
+document.l10n.ready(function loadWhenIdle() {
   var idleObserver = {
     time: 5,
     onidle: function() {

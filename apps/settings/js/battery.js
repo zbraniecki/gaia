@@ -60,9 +60,9 @@ var Battery = (function Battery() {
   };
 })();
 
-navigator.mozL10n.ready(function SettingsBattery() {
+document.l10n.ready(function SettingsBattery() {
   function updateInfo(battery) {
-    var _ = navigator.mozL10n.get;
+    var _ = document.l10n.get;
 
     // display the current battery level
     var level = Math.min(100, Math.round(battery.level * 100));
@@ -70,7 +70,7 @@ navigator.mozL10n.ready(function SettingsBattery() {
     if (battery.charging) {
       state = (level == 100) ? 'charged' : 'charging';
     }
-    var text = _('batteryLevel-percent-' + state, { level: level });
+    var text = _('batteryLevel_percent_' + state, { level: level });
 
     var batteryLevel = document.querySelector('#battery-level *');
     if (batteryLevel) {

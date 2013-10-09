@@ -113,7 +113,10 @@ function loadJSON(href, callback) {
  * L10n helper
  */
 
-var localize = navigator.mozL10n.localize;
+var localize = function (node, l10nId) {
+  node.setAttribute('data-l10n-id', l10nId);
+  document.l10n.localizeNode(node);
+}
 
 /**
  * Helper class for formatting file size strings
@@ -189,7 +192,7 @@ var DeviceStorageHelper = (function DeviceStorageHelper() {
     var fixedDigits = (size < 1024 * 1024) ? 0 : 1;
     var sizeInfo = FileSizeFormatter.getReadableFileSize(size, fixedDigits);
 
-    var _ = navigator.mozL10n.get;
+    var _ = document.l10n.get;
     element.textContent = _(l10nId, {
       size: sizeInfo.size,
       unit: _('byteUnit-' + sizeInfo.unit)

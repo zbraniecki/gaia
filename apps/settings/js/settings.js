@@ -221,7 +221,7 @@ var Settings = {
 
   afterPanelLoad: function(panel, cb) {
     // translate content
-    navigator.mozL10n.translate(panel);
+    document.l10n.localizeNode(panel);
 
     // activate all scripts
     var scripts = panel.getElementsByTagName('script');
@@ -509,7 +509,7 @@ var Settings = {
             //XXX bug 816899 will also provide 'deviceinfo.software' from Gecko
             //  which is {os name + os version}
             case 'deviceinfo.software':
-              var _ = navigator.mozL10n.get;
+              var _ = document.l10n.get;
               var text = _('brandShortName') + ' ' +
                 result['deviceinfo.os'];
               spanFields[i].textContent = text;
@@ -522,7 +522,7 @@ var Settings = {
               break;
 
             case 'deviceinfo.mac':
-              var _ = navigator.mozL10n.get;
+              var _ = document.l10n.get;
               spanFields[i].textContent = _('macUnavailable');
               break;
           }
@@ -763,6 +763,7 @@ var Settings = {
     var panel = document.getElementById('languages');
     // update the date and time samples in the 'languages' panel
     if (panel.children.length) {
+      return;
       var d = new Date();
       var f = new navigator.mozL10n.DateTimeFormat();
       var _ = navigator.mozL10n.get;
@@ -961,7 +962,7 @@ window.addEventListener('keydown', function handleSpecialKeys(event) {
 
 // startup & language switching
 function startupLocale() {
-  navigator.mozL10n.ready(function startupLocale() {
+  document.l10n.ready(function startupLocale() {
     initLocale();
     // XXX this might call `initLocale()` twice until bug 882592 is fixed
     window.addEventListener('localized', initLocale);
@@ -969,11 +970,11 @@ function startupLocale() {
 }
 
 function initLocale() {
-  var lang = navigator.mozL10n.language.code;
+  var lang = 'en-US';
 
   // set the 'lang' and 'dir' attributes to <html> when the page is translated
   document.documentElement.lang = lang;
-  document.documentElement.dir = navigator.mozL10n.language.direction;
+  document.documentElement.dir = 'ltr';
 
   // display the current locale in the main panel
   Settings.getSupportedLanguages(function displayLang(languages) {

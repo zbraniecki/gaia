@@ -4,8 +4,8 @@
 'use strict';
 
 // handle Wi-Fi settings
-navigator.mozL10n.ready(function wifiSettings() {
-  var _ = navigator.mozL10n.get;
+document.l10n.ready(function wifiSettings() {
+  var _ = document.l10n.get;
 
   var settings = window.navigator.mozSettings;
   if (!settings)
@@ -121,7 +121,7 @@ navigator.mozL10n.ready(function wifiSettings() {
       });
       req.onsuccess = function() {
         gWpsInProgress = false;
-        localize(gWpsInfoBlock, 'fullStatus-wps-canceled');
+        localize(gWpsInfoBlock, 'fullStatus_wps_canceled');
         wpsStatusReset();
       };
       req.onerror = function() {
@@ -156,10 +156,10 @@ navigator.mozL10n.ready(function wifiSettings() {
         }
         gWpsInProgress = true;
         localize(gWpsPbcLabelBlock, 'wpsCancelMessage');
-        localize(gWpsInfoBlock, 'fullStatus-wps-inprogress');
+        localize(gWpsInfoBlock, 'fullStatus_wps_inprogress');
       };
       req.onerror = function() {
-        gWpsInfoBlock.textContent = _('fullStatus-wps-failed') +
+        gWpsInfoBlock.textContent = _('fullStatus_wps_failed') +
           ' [' + req.error.name + ']';
       };
     }
@@ -773,7 +773,7 @@ navigator.mozL10n.ready(function wifiSettings() {
     gNetworkList.display(gCurrentNetwork, networkStatus);
 
     gWifiInfoBlock.textContent =
-        _('fullStatus-' + networkStatus, gWifiManager.connection.network);
+        _('fullStatus_' + networkStatus, gWifiManager.connection.network);
 
     if (networkStatus === 'connectingfailed' && gCurrentNetwork) {
       settings.createLock().set({'wifi.connect_via_settings': false});
@@ -805,7 +805,7 @@ navigator.mozL10n.ready(function wifiSettings() {
        * To be responsive, show 'initializing' status and 'search...' first.
        * A 'scan' would be called when gWifiManager is enabled.
        */
-      gWifiInfoBlock.textContent = _('fullStatus-initializing');
+      gWifiInfoBlock.textContent = _('fullStatus_initializing');
       gNetworkList.clear(true);
       document.querySelector('#wps-column').hidden = false;
     } else {

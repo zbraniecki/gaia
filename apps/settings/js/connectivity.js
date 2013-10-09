@@ -14,7 +14,7 @@
 var Connectivity = (function(window, document, undefined) {
   var _initialized = false;
   var _macAddress = '';
-  var _ = navigator.mozL10n.get;
+  var _ = document.l10n.get;
 
   // in util.js, we fake these device interfaces if they are not exist.
   var wifiManager = WifiHelper.getWifiManager();
@@ -106,7 +106,7 @@ var Connectivity = (function(window, document, undefined) {
       // network.connection.status has one of the following values:
       // connecting, associated, connected, connectingfailed, disconnected.
       localize(wifiDesc,
-               'fullStatus-' + wifiManager.connection.status,
+               'fullStatus_' + wifiManager.connection.status,
                wifiManager.connection.network);
     } else {
       localize(wifiDesc, 'disabled');
@@ -266,7 +266,7 @@ var Connectivity = (function(window, document, undefined) {
       return; // init will call updateBluetooth()
     }
 
-    var l10nId = bluetooth.enabled ? 'bt-status-nopaired' : 'bt-status-turnoff';
+    var l10nId = bluetooth.enabled ? 'bt_status_nopaired' : 'bt_status_turnoff';
     localize(bluetoothDesc, l10nId);
 
     if (!bluetooth.enabled) {
@@ -287,7 +287,7 @@ var Connectivity = (function(window, document, undefined) {
           return a.name > b.name;
         });
 
-        localize(bluetoothDesc, 'bt-status-paired',
+        localize(bluetoothDesc, 'bt_status_paired',
                  { name: paired[0].name, n: length - 1 });
       };
     };
@@ -329,7 +329,7 @@ var Connectivity = (function(window, document, undefined) {
 
 
 // starting when we get a chance
-navigator.mozL10n.ready(function loadWhenIdle() {
+document.l10n.ready(function loadWhenIdle() {
   var idleObserver = {
     time: 3,
     onidle: function() {

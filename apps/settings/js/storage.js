@@ -72,7 +72,7 @@ var Storage = {
 
   // ums info
   updateUmsInfo: function storage_updateUmsInfo() {
-    var _ = navigator.mozL10n.get;
+    var _ = document.l10n.get;
     if (this.umsEnabledCheckBox.checked) {
       //TODO list all enabled volume name
       this.umsEnabledInfoBlock.textContent = _('enabled');
@@ -86,7 +86,7 @@ var Storage = {
     }
   },
   umsMasterSettingChanged: function storage_umsMasterSettingChanged(evt) {
-    var _ = navigator.mozL10n.get;
+    var _ = document.l10n.get;
     var checkbox = evt.target;
     var cset = {};
     var umsSettingKey = 'ums.enabled';
@@ -127,7 +127,7 @@ var Storage = {
 
     var self = this;
     this.defaultMediaVolume.available().onsuccess = function(evt) {
-      var _ = navigator.mozL10n.get;
+      var _ = document.l10n.get;
       var state = evt.target.result;
       var firstVolume = navigator.getDeviceStorages('sdcard')[0];
       // if the default storage is unavailable, and it's not the
@@ -144,7 +144,7 @@ var Storage = {
   },
 
   updateVolumeState: function storage_updateVolumeState(volume, state) {
-    var _ = navigator.mozL10n.get;
+    var _ = document.l10n.get;
     this.defaultVolumeState = state;
     this.updateUmsInfo();
     switch (state) {
@@ -210,4 +210,4 @@ var Storage = {
 
 };
 
-navigator.mozL10n.ready(Storage.init.bind(Storage));
+document.l10n.ready(Storage.init.bind(Storage));
