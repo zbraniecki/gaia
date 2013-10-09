@@ -4,6 +4,11 @@
     <meta charset="utf-8">
     <title>Settings</title>
 
+    <meta name="locales" content="en-US, pl, fr" />
+    <meta name="default_locale" content="en-US" />
+    <meta name="resources" content="./locales/settings.{{locale}}.lol" />
+    <script async src="./shared/js/l20n.gaia.min.js"></script>
+
     <!-- Debug/DUMP method support -->
     <script defer="" src="/shared/js/dump.js"></script>
     <script defer="" src="/shared/js/settings_url.js"></script>
@@ -39,15 +44,6 @@
     <link rel="resource" type="application/json" href="shared/resources/media/notifications/"/>
     <link rel="resource" type="image/png" href="shared/resources/branding/privacy_sprite.png"/>
     -->
-
-    <!-- Localization -->
-    <link rel="resource" type="application/l10n" href="shared/locales/branding.ini">
-    <link rel="resource" type="application/l10n" href="shared/locales/date.ini">
-    <link rel="resource" type="application/l10n" href="shared/locales/permissions.ini">
-    <link rel="resource" type="application/l10n" href="shared/locales/tz.ini">
-    <link rel="resource" type="application/l10n" href="locales/locales.ini">
-    <script defer="" src="shared/js/l10n.js"></script>
-    <script defer="" src="shared/js/l10n_date.js"></script>
 
     <!-- For perf-measurement related utilities -->
     <script defer="" src="/shared/js/performance_testing_helper.js"></script>
