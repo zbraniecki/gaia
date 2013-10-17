@@ -1,0 +1,1 @@
+/Users/zbraniecki/projects/l20n/js/examples/langpack/service.js

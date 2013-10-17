@@ -9,6 +9,8 @@
  * `uncaught exception: 2147500033' message (= 0x80004001).
  */
 
+window.lps = new LPS();
+
 var Settings = {
   get mozSettings() {
     // return navigator.mozSettings when properly supported, null otherwise
@@ -65,6 +67,7 @@ var Settings = {
       window.scrollTo(0, 0);
     }
 
+    var self = this;
     window.addEventListener('transitionend', function paintWait() {
       window.removeEventListener('transitionend', paintWait);
 
@@ -98,6 +101,9 @@ var Settings = {
             case 'wifi':
               PerformanceTestingHelper.dispatch('settings-panel-wifi-visible');
               break;
+            case 'languages':
+              self.redrawLanguagesPanel();
+              break;
           }
         });
       });
@@ -110,6 +116,19 @@ var Settings = {
     var settings = this.mozSettings;
     if (!settings)
       return;
+
+    window.lps.registerApplication('settings.gaiamobile.org', {
+      'languages': {
+        'ar': 1,
+        'en-US': 1,
+        'fr': 1,
+        'zh-TW': 1,
+      },
+      'version': 1.0,
+      'default_locale': 'en-US',
+    });
+    window.lps.tick();
+    //window.lps.startTicks();
 
     // Make a request for settings to warm the cache, since we need it
     // very soon in startup after the DOM is available.
@@ -262,6 +281,37 @@ var Settings = {
     }
   },
 
+  redrawLanguagesPanel: function settings_redrawLanguagesPanel() {
+    var langSel = document.querySelector('select[name="language.current"]');
+    langSel.innerHTML = '';
+    Settings.getSupportedLanguages(function fillLanguageList(languages) {
+      var langs = Object.keys(languages);
+
+      langs.sort();
+      for (var l in langs) {
+        var lang = langs[l];
+        var option = document.createElement('option');
+        option.value = lang;
+        // Right-to-Left (RTL) languages:
+        // (http://www.w3.org/International/questions/qa-scripts)
+        // Arabic, Hebrew, Farsi, Pashto, Urdu
+        var rtlList = ['ar', 'he', 'fa', 'ps', 'ur'];
+        // Use script direction control-characters to wrap the text labels
+        // since markup (i.e. <bdo>) does not work inside <option> tags
+        // http://www.w3.org/International/tutorials/bidi-xhtml/#nomarkup
+        var lEmbedBegin =
+      (rtlList.indexOf(lang) >= 0) ? '&#x202B;' : '&#x202A;';
+    var lEmbedEnd = '&#x202C;';
+    // The control-characters enforce the language-specific script
+    // direction to correctly display the text label (Bug #851457)
+    option.innerHTML = lEmbedBegin + languages[lang] + lEmbedEnd;
+    option.selected = (lang == document.documentElement.lang);
+    langSel.appendChild(option);
+      }
+    });
+    setTimeout(this.updateLanguagePanel);
+  },
+  
   lazyLoad: function settings_lazyLoad(panel) {
     if (panel.dataset.rendered) { // already initialized
       return;
@@ -289,30 +339,7 @@ var Settings = {
         bug344618_polyfill();     // XXX to be removed when bug344618 is fixed
         break;
       case 'languages':           // fill language selector
-        var langSel = document.querySelector('select[name="language.current"]');
-        langSel.innerHTML = '';
-        Settings.getSupportedLanguages(function fillLanguageList(languages) {
-          for (var lang in languages) {
-            var option = document.createElement('option');
-            option.value = lang;
-            // Right-to-Left (RTL) languages:
-            // (http://www.w3.org/International/questions/qa-scripts)
-            // Arabic, Hebrew, Farsi, Pashto, Urdu
-            var rtlList = ['ar', 'he', 'fa', 'ps', 'ur'];
-            // Use script direction control-characters to wrap the text labels
-            // since markup (i.e. <bdo>) does not work inside <option> tags
-            // http://www.w3.org/International/tutorials/bidi-xhtml/#nomarkup
-            var lEmbedBegin =
-                (rtlList.indexOf(lang) >= 0) ? '&#x202B;' : '&#x202A;';
-            var lEmbedEnd = '&#x202C;';
-            // The control-characters enforce the language-specific script
-            // direction to correctly display the text label (Bug #851457)
-            option.innerHTML = lEmbedBegin + languages[lang] + lEmbedEnd;
-            option.selected = (lang == document.documentElement.lang);
-            langSel.appendChild(option);
-          }
-        });
-        setTimeout(this.updateLanguagePanel);
+        //this.redrawLanguagesPanel();
         break;
       case 'keyboard':
         //Settings.updateKeyboardPanel();
@@ -589,8 +616,19 @@ var Settings = {
         break;
     }
 
-    var cset = {}; cset[key] = value;
-    settings.createLock().set(cset);
+    switch (key) {
+      // XXX: once LPS is a service, we want to download langpack here
+      //case 'language.current':
+      //  window.lps.updateRequestedLocales([value], function() {
+      //    var cset = {}; cset[key] = value;
+      //    settings.createLock().set(cset);
+      //  });
+      //  break;
+      default:
+        var cset = {}; cset[key] = value;
+        settings.createLock().set(cset);
+    }
+
   },
 
   openDialog: function settings_openDialog(dialogID) {
@@ -695,14 +733,20 @@ var Settings = {
       return;
 
     if (this._languages) {
-      callback(this._languages);
+      window.lps.getSupportedLanguages(function(languageNames) {
+        self._languages = languageNames;
+        callback(self._languages);
+      });
     } else {
-      var self = this;
       var LANGUAGES = '/shared/resources/languages.json';
       loadJSON(LANGUAGES, function loadLanguages(data) {
         if (data) {
-          self._languages = data;
-          callback(self._languages);
+          window.lps.addSystemLanguages(data, function() {
+            window.lps.getSupportedLanguages(function(languageNames) {
+              self._languages = languageNames;
+              callback(self._languages);
+            });
+          });
         }
       });
     }

@@ -3,15 +3,17 @@
   <head>
     <meta charset="utf-8">
     <title>Settings</title>
+    <script src="/shared/js/l10nbridge.js"></script>
 
     <meta name="locales" content="en-US, pl, fr" />
     <meta name="default_locale" content="en-US" />
     <meta name="resources" content="./locales/settings.{{locale}}.lol" />
-    <script async src="./shared/js/l20n.gaia.min.js"></script>
 
     <!-- Debug/DUMP method support -->
     <script defer="" src="/shared/js/dump.js"></script>
     <script defer="" src="/shared/js/settings_url.js"></script>
+    <script src="/shared/js/intl.js"></script>
+    <script src="/shared/js/lps.js"></script>
 
     <!-- Common style -->
     <link rel="stylesheet" type="text/css" href="shared/style/headers.css">
@@ -53,6 +55,7 @@
 
     <!-- Specific code -->
     <script defer="" src="js/settings.js"></script>
+    <script defer="" src="./shared/js/l20n.gaia.js"></script>
 
     <!-- shared helper library -->
     <!--<script defer src="/shared/js/icc_helper.js"></script>-->
@@ -220,7 +223,49 @@
     <!-- Personalization :: Date & Time -->
     <section is="dateTime" role="region" id="dateTime"></section>
     <!-- Personalization :: Language & Region -->
-    <section is="languages" role="region" id="languages"></section>
+    <section is="languages" role="region" id="languages">
+        <header>
+      <a href="#root"><span class="icon icon-back">back</span></a>
+      <h1 data-l10n-id="language"> Language </h1>
+    </header>
+
+    <div>
+      <header>
+        <h2 data-l10n-id="sample_format">Sample Format</h2>
+      </header>
+      <ul>
+        <li class="description">
+          <p id="region-date">Friday, September 28 2012</p>
+          <p id="region-time">06:54 PM</p>
+        </li>
+        <li>
+          <p data-l10n-id="language">Language</p>
+          <p class="fake-select">
+            <button class="icon icon-dialog">Language</button>
+            <select name="language.current"></select>
+          </p>
+        </li>
+        <li hidden>
+          <p data-l10n-id="region">Region</p>
+          <p class="fake-select">
+            <button class="icon icon-dialog">empty</button>
+            <select name="region.current">
+              <option value="BR">Brasil</option>
+              <option value="CO">Columbia</option>
+              <option value="ES">España</option>
+              <option value="FR">France</option>
+              <option value="PT">Portugal</option>
+              <option value="TW">Taiwan</option>
+              <option value="UK">United Kingdom</option>
+              <option value="US">United States</option>
+              <option value="VZ">Venezuela</option>
+            </select>
+          </p>
+        </li>
+      </ul>
+    </div>
+    
+    </section>
     <!-- Personalization :: Homescreen :: details -->
     <section is="homescreen-details" role="region" id="homescreen-details"></section>
     <!-- Personalization :: Homescreen -->
