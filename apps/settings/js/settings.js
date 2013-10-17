@@ -10,6 +10,17 @@
  */
 
 window.lps = new LPS();
+window.lps.registerApplication('settings.gaiamobile.org', {
+  'languages': {
+    'ar': 1,
+    'en-US': 1,
+    'fr': 1,
+    'zh-TW': 1,
+  },
+  'version': 1.0,
+  'default_locale': 'en-US',
+});
+window.lps.startTicks();
 
 var Settings = {
   get mozSettings() {
@@ -116,19 +127,6 @@ var Settings = {
     var settings = this.mozSettings;
     if (!settings)
       return;
-
-    window.lps.registerApplication('settings.gaiamobile.org', {
-      'languages': {
-        'ar': 1,
-        'en-US': 1,
-        'fr': 1,
-        'zh-TW': 1,
-      },
-      'version': 1.0,
-      'default_locale': 'en-US',
-    });
-    window.lps.tick();
-    //window.lps.startTicks();
 
     // Make a request for settings to warm the cache, since we need it
     // very soon in startup after the DOM is available.
