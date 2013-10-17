@@ -1,1 +1,0 @@
-/Users/zbraniecki/projects/l20n/js/dist/gaia/l20n.js
