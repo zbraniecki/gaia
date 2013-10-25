@@ -285,7 +285,7 @@ document.l10n.ready(function wifiSettings() {
     // Show connection status
     icon.classList.add('wifi-signal');
     if (WifiHelper.isConnected(network)) {
-      small.textContent = _('shortStatus-connected');
+      small.textContent = _('shortStatus_connected');
       icon.classList.add('connected');
       li.classList.add('active');
     }
@@ -434,14 +434,14 @@ document.l10n.ready(function wifiSettings() {
       if (active && active != listItem) {
         active.classList.remove('active');
         active.querySelector('small').textContent =
-            _('shortStatus-disconnected');
+            _('shortStatus_disconnected');
         active.querySelector('aside').classList.remove('connecting');
         active.querySelector('aside').classList.remove('connected');
       }
       if (listItem) {
         listItem.classList.add('active');
         listItem.querySelector('small').textContent =
-                                            _('shortStatus-' + networkStatus);
+                                            _('shortStatus_' + networkStatus);
         if (networkStatus === 'connecting') {
           listItem.querySelector('aside').classList.add('connecting');
         }

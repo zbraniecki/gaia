@@ -33,9 +33,9 @@
 <scanning "Searching…">
 <scanNetworks "Search again">
 <fullStatus_initializing       " Initializing…">
-<fullStatus_connecting         " Connecting to {{ssid}}…">
+<fullStatus_connecting         " Connecting to {{$ssid}}…">
 <fullStatus_associated         " Obtaining an IP address…">
-<fullStatus_connected          " Connected to {{ssid}}">
+<fullStatus_connected          " Connected to {{$ssid}}">
 <fullStatus_connectingfailed   " Connection failed">
 <fullStatus_disconnected       " Offline">
 <shortStatus_connecting        " Connecting…">
@@ -45,7 +45,7 @@
 <shortStatus_disconnected      " Offline">
 <manageNetworks "Manage networks">
 <joinHiddenNetwork "Join hidden network">
-<securedBy "Secured by {{capabilities}}">
+<securedBy "Secured by {{$capabilities}}">
 <security      " Security">
 <securityNone  " None">
 <securityOpen  " Open">
@@ -77,7 +77,7 @@
 <fullStatus_wps_timedout    " WPS timed out">
 <fullStatus_wps_failed      " WPS failed">
 <fullStatus_wps_overlapped  " Another WPS PBC AP was found">
-<wpsDescription "Automatic wireless network configuration">
+<wpsDescription2 "Automatic Wi-Fi setup">
 <wpsMethodSelection "Select a WPS method:">
 <wpsPbcLabel "Button connection">
 <wpsMyPinLabel "My PIN connection">
