@@ -42,6 +42,12 @@ function L10nManager(gaiaDir,
   this.deviceType = subject.deviceType;
   this.defaultLocale = subject.defaultLocale;
 
+  function getTypes(path) {
+    var fullDir = utils.getFile(path);
+    var types = utils.listFiles(fullDir, utils.FILE_TYPE_DIRECTORY, false);
+    return types.map(function(typePath){return utils.basename(typePath)});
+  }
+
   /**
    * Copy l10n resources required by the .html file to build stage directory
    *
@@ -76,38 +82,47 @@ function L10nManager(gaiaDir,
       // XXX: We should use @formFactor for device specific L10N support,
       // isSubjectToDeviceType should be removed after bug 936532 landed.
       if (utils.isSubjectToDeviceType(resURL)) {
-        realURL = utils.joinPath(utils.dirname(resURL),
-                                 self.deviceType,
-                                 utils.basename(resURL));
-      }
-
-      for (var loc of self.locales) {
-        var relPathInApp =
-          file.parent.path.substr(webapp.buildDirectoryFile.path.length);
-        var resFile =
-          getResourceFile(webapp, relPathInApp,
-                          realURL, loc, isOfficialBranding);
-        var isShared = /\.?\/?shared\//.test(realURL);
-
-        var destFile;
-        if (isShared) {
-          destFile = utils.getFile(webapp.buildDirectoryFile.path,
-                                   realURL.replace('{locale}', loc));
-        } else {
-          destFile = utils.getFile(webapp.buildDirectoryFile.path,
-                                   relPathInApp,
-                                   realURL.replace('{locale}', loc));
-        }
-        if (!resFile.exists()) {
-          if (self.localeBasedir !== null) {
-            utils.log(MODNAME, 'Resource file not found: ' + resFile.path);
-          }
-          continue;
-        }
-        utils.ensureFolderExists(destFile.parent);
-        resFile.copyTo(destFile.parent, destFile.leafName);
+        var dirPath = utils.joinPath(webapp.buildDirectoryFile.path, utils.dirname(resURL));
+        var types = getTypes(dirPath);
+        types.forEach(function(type) {
+          var realURL = utils.joinPath(utils.dirname(resURL),
+                                       type,
+                                       utils.basename(resURL));
+          copyFile(file, webapp, realURL, isOfficialBranding);
+        });
+      } else {
+        copyFile(file, webapp, realURL, isOfficialBranding);
       }
     });
+  }
+
+  function copyFile(file, webapp, realURL, isOfficialBranding) {
+    for (var loc of self.locales) {
+      var relPathInApp =
+        file.parent.path.substr(webapp.buildDirectoryFile.path.length);
+      var resFile =
+        getResourceFile(webapp, relPathInApp,
+                        realURL, loc, isOfficialBranding);
+      var isShared = /\.?\/?shared\//.test(realURL);
+
+      var destFile;
+      if (isShared) {
+        destFile = utils.getFile(webapp.buildDirectoryFile.path,
+                                 realURL.replace('{locale}', loc));
+      } else {
+        destFile = utils.getFile(webapp.buildDirectoryFile.path,
+                                 relPathInApp,
+                                 realURL.replace('{locale}', loc));
+      }
+      if (!resFile.exists()) {
+        if (self.localeBasedir !== null) {
+          utils.log(MODNAME, 'Resource file not found: ' + resFile.path);
+        }
+        continue;
+      }
+      utils.ensureFolderExists(destFile.parent);
+      resFile.copyTo(destFile.parent, destFile.leafName);
+    }
   }
 
   /**

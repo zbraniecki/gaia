@@ -25,7 +25,7 @@
 
     ctx.addEventListener('notfounderror', function(e) {
       if (e.loc === 'en-US') {
-        throw e;
+        //throw e;
       }
     });
 

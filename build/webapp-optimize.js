@@ -29,6 +29,7 @@ var HTMLOptimizer = function(options) {
   this.win = options.win;
   this.locales = options.locales;
   this.optimizeConfig = options.optimizeConfig;
+  this.usesDeviceTypeL10n = new Set();
 
   // When file has done optimized, we call done.
   this.done = options.callback;
@@ -58,7 +59,7 @@ HTMLOptimizer.prototype.process = function() {
   if ((!this.win.document.querySelector('script[src$="l10n.js"]') &&
        !this.win.document.querySelector('link[rel="localization"]')) ||
       ignore[this.webapp.sourceDirectoryName]) {
-    this.done(this.files);
+    this.done(this.files, this.usesDeviceTypeL10n);
     return;
   }
 
@@ -110,7 +111,7 @@ HTMLOptimizer.prototype._optimize = function() {
 
   this.serializeNewHTMLDocumentOutput();
 
-  this.done(this.files);
+  this.done(this.files, this.usesDeviceTypeL10n);
 };
 
 // create JSON dicts for the current language; one for the <script> tag
@@ -266,6 +267,10 @@ HTMLOptimizer.prototype.concatL10nResources = function() {
         // attribute we will embed the locales json link
         if (!link.hasAttribute('data-no-fetch')) {
           fetch = true;
+        }
+
+        if (utils.isSubjectToDeviceType(link.getAttribute('href'))) {
+          this.usesDeviceTypeL10n.add(link.getAttribute('href'));
         }
         break;
     }
@@ -522,11 +527,6 @@ HTMLOptimizer.prototype.getFileByRelativePath = function(relativePath) {
     file.append((this.config.OFFICIAL === '1') ? 'official' : 'unofficial');
     file.append(fileName);
   }
-  if (utils.isSubjectToDeviceType(file.path)) {
-    file = file.parent;
-    file.append(this.config.GAIA_DEVICE_TYPE);
-    file.append(fileName);
-  }
 
   try {
     return {
@@ -607,6 +607,8 @@ var WebappOptimize = function() {
   this.win = null;
   this.locales = null;
   this.numOfFiles = 0;
+  this.deviceTypeL10nCtxs = [];
+  this.usesDeviceTypeL10n = new Set();
 };
 
 WebappOptimize.prototype.RE_HTML = /\.html$/;
@@ -634,7 +636,13 @@ WebappOptimize.prototype.processFile = function(file) {
 
 // After all files are processed, we'll remove all merged files. And try to
 // minify other unmerged script.
-WebappOptimize.prototype.HTMLProcessed = function(files) {
+WebappOptimize.prototype.HTMLProcessed = function(files, usesDeviceTypeL10n) {
+  if (usesDeviceTypeL10n) {
+    usesDeviceTypeL10n.forEach(function(href) {
+      this.usesDeviceTypeL10n.add(href);
+    }, this);
+  }
+
   this.numOfFiles--;
   if (this.numOfFiles !== 0) {
     return;
@@ -642,22 +650,79 @@ WebappOptimize.prototype.HTMLProcessed = function(files) {
   this.writeASTs();
 };
 
+function getTypes(path) {
+  var fullDir = utils.getFile(path);
+  var types = utils.listFiles(fullDir, utils.FILE_TYPE_DIRECTORY, false);
+  return types.map(function(typePath){return utils.basename(typePath)});
+}
+
+function morphASTIntoMultiDeviceAST(ast, locale, usesDeviceTypeL10n) {
+  var newAst = {
+    'common': ast,
+    'device_types': {}
+  };
+
+  for (var type in this.deviceTypeL10nCtxs) {
+    var ctx = this.deviceTypeL10nCtxs[type];
+    ctx.requestLocales(locale);
+    var win = {
+      ctx: ctx,
+      qps: this.win.navigator.mozL10n.qps,
+    };
+    newAst['device_types'][type] = this.win.navigator.mozL10n.getAST.call(win);
+  }
+  return newAst;
+}
+
+function setDeviceTypeContexts(usesDeviceTypeL10n, locales) {
+  var Context = this.win.navigator.mozL10n._getInternalAPI().Context;
+
+  usesDeviceTypeL10n.forEach(function(uri) {
+    var localeObjDir = this.webapp.buildDirectoryFile.clone();
+    var dirPath = utils.joinPath(localeObjDir.path, utils.dirname(uri));
+    var types = getTypes(dirPath); 
+    types.forEach(function(type) {
+      if (!this.deviceTypeL10nCtxs[type]) {
+        this.deviceTypeL10nCtxs[type] = new Context(); 
+      }
+
+      var typeFilePath = utils.joinPath(utils.dirname(uri), type, utils.basename(uri));
+      this.deviceTypeL10nCtxs[type].resLinks.push('/' + typeFilePath);
+      this.deviceTypeL10nCtxs[type].registerLocales('en-US', locales);
+    }, this);
+  }, this);
+}
+
 // all HTML documents in the webapp have been optimized:
 // create one concatenated l10n file per locale for all HTML documents
 WebappOptimize.prototype.writeASTs = function() {
   if (this.config.GAIA_CONCAT_LOCALES !== '1') {
     return;
   }
+
   var localeObjDir = this.webapp.buildDirectoryFile.clone();
   var reserved = {};
   localeObjDir.append('locales-obj');
   utils.ensureFolderExists(localeObjDir);
 
+  if (this.usesDeviceTypeL10n) {
+    setDeviceTypeContexts.call(this, this.usesDeviceTypeL10n, Object.keys(this.webapp.asts));
+  }
   // create all JSON ASTs in /locales-obj
   for (var lang in this.webapp.asts) {
+    var ast;
+    if (this.usesDeviceTypeL10n) {
+      ast = morphASTIntoMultiDeviceAST.call(
+        this,
+        this.webapp.asts[lang],
+        lang,
+        this.usesDeviceTypeL10n);
+    } else {
+      ast = this.webapp.asts[lang];
+    }
     var file = localeObjDir.clone();
     file.append(lang + '.json');
-    utils.writeContent(file, JSON.stringify(this.webapp.asts[lang]));
+    utils.writeContent(file, JSON.stringify(ast));
     reserved[file.leafName] = true;
   }
 

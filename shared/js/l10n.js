@@ -1151,7 +1151,12 @@
 
     function onJSONLoaded(err, json) {
       if (!err && json) {
-        self.addAST(json);
+        if (typeof(json) === 'object') {
+          self.addAST(json.common);
+          self.addAST(json.device_types[self.ctx.deviceType]);
+        } else {
+          self.addAST(json);
+        }
       }
       onL10nLoaded(err);
     }
@@ -1175,7 +1180,17 @@
           io.loadJSON(path, onJSONLoaded, sync);
           break;
         case 'properties':
-          io.load(path, onPropLoaded, sync);
+          if (path.indexOf('/device_type/') !== -1) {
+            if (window.document) {
+              path.replace(
+                '/device_type', '/device_type/' + self.ctx.deviceType);
+              io.load(path, onPropLoaded, sync);
+            } else {
+              onL10nLoaded();
+            }
+          } else {
+            io.load(path, onPropLoaded, sync);
+          }
           break;
       }
     }
@@ -1209,6 +1224,8 @@
     this.defaultLocale = 'en-US';
     this.availableLocales = [];
     this.supportedLocales = [];
+
+    this.deviceType = 'tv';
 
     this.resLinks = [];
     this.locales = {};
