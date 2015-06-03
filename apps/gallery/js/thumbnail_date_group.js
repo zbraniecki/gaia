@@ -134,11 +134,17 @@ ThumbnailDateGroup.formatter = new navigator.mozL10n.DateTimeFormat();
 
 ThumbnailDateGroup.prototype.localize = function() {
   var date = new Date(this.date);
-  navigator.mozL10n.formatValue('date-group-header').then(function(format) {
-    var formattedDate =
-      ThumbnailDateGroup.formatter.localeFormat(date, format);
-    this.header.textContent = formattedDate;
-  }.bind(this));
+
+  var options = {
+    month: 'long',
+    year: 'numeric',
+  }; 
+
+  // XXX: It would be nice to reuse this object between ThumbinalGroups
+  var formatter = new Intl.DateTimeFormat(navigator.languages, options);
+
+  this.header.textContent = formatter.format(date);
+
   // Localize each of the group's thumbnails.
   this.thumbnails.forEach(function(thumbnail) { thumbnail.localize(); });
 };

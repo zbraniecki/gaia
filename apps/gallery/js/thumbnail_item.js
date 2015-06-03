@@ -39,10 +39,22 @@ ThumbnailItem.formatter = new navigator.mozL10n.DateTimeFormat();
 
 ThumbnailItem.prototype.localize = function() {
   var date = new Date(this.data.date);
+
   var descId = !this.data.metadata.video ?
-    'imageDescriptionShort' : 'videoDescriptionShort';
-  navigator.mozL10n.formatValue(descId).then(function(description) {
-    var label = ThumbnailItem.formatter.localeFormat(date, description);
-    this.imgNode.setAttribute('aria-label', label);
-  }.bind(this));
+    'imageDated' : 'videoDated';
+
+  var options = {
+    hour: 'numeric',
+    minute: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  }; 
+
+  // XXX: It would be nice to reuse this object between ThumbinalItems
+  var formatter = new Intl.DateTimeFormat(navigator.languages, options);
+
+  navigator.mozL10n.setAttributes(this.imgNode, descId, {
+    timeStamp: formatter.format(date)
+  });
 };
