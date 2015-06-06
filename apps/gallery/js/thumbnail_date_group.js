@@ -130,20 +130,15 @@ ThumbnailDateGroup.prototype.removeItem = function(thumbnail) {
   this.container.removeChild(thumbnail.htmlNode);
 };
 
-ThumbnailDateGroup.formatter = new navigator.mozL10n.DateTimeFormat();
+ThumbnailDateGroup.formatter = new Intl.DateTimeFormat(navigator.language, {
+  month: 'long',
+  year: 'numeric',
+});
 
 ThumbnailDateGroup.prototype.localize = function() {
   var date = new Date(this.date);
 
-  var options = {
-    month: 'long',
-    year: 'numeric',
-  }; 
-
-  // XXX: It would be nice to reuse this object between ThumbinalGroups
-  var formatter = new Intl.DateTimeFormat(navigator.languages, options);
-
-  this.header.textContent = formatter.format(date);
+  this.header.textContent = ThumbnailDateGroup.formatter.format(date);
 
   // Localize each of the group's thumbnails.
   this.thumbnails.forEach(function(thumbnail) { thumbnail.localize(); });

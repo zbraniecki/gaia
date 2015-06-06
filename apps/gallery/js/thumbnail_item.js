@@ -35,7 +35,13 @@ function ThumbnailItem(fileData) {
   this.localize();
 }
 
-ThumbnailItem.formatter = new navigator.mozL10n.DateTimeFormat();
+ThumbnailItem.formatter = new Intl.DateTimeFormat(navigator.language, {
+    hour: 'numeric',
+    minute: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
 
 ThumbnailItem.prototype.localize = function() {
   var date = new Date(this.data.date);
@@ -43,18 +49,7 @@ ThumbnailItem.prototype.localize = function() {
   var descId = !this.data.metadata.video ?
     'imageDated' : 'videoDated';
 
-  var options = {
-    hour: 'numeric',
-    minute: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  }; 
-
-  // XXX: It would be nice to reuse this object between ThumbinalItems
-  var formatter = new Intl.DateTimeFormat(navigator.languages, options);
-
   navigator.mozL10n.setAttributes(this.imgNode, descId, {
-    timeStamp: formatter.format(date)
+    timeStamp: ThumbnailItem.formatter.format(date)
   });
 };
