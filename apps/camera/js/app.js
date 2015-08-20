@@ -372,23 +372,6 @@ App.prototype.localized = function() {
 };
 
 /**
- * Central place to localize a string.
- *
- * @param  {String} key
- * @public
- */
-App.prototype.l10nGet = function(key) {
-  var l10n = navigator.mozL10n;
-  if (l10n) {
-    return l10n.get(key);
-  }
-
-  // in case we don't have mozL10n loaded yet, we want to
-  // return the key. See bug 999132
-  return key;
-};
-
-/**
  * Shows the loading screen after the
  * number of ms defined in config.js
  *

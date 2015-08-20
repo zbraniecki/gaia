@@ -64,7 +64,11 @@ module.exports = View.extend({
     var li = document.createElement('li');
     var isSelected = option.key === this.selectedKey;
 
-    li.textContent = localizable ? this.l10n.get(option.title) : option.title;
+    if (localizable) {
+      li.setAttribute('data-l10n-id', option.title);
+    } else {
+      li.textContent = option.title;
+    }
     li.setAttribute('data-key', option.key);
     // The settings options list is a listbox (list of actionable items) thus
     // each iteam must have an 'option' role.

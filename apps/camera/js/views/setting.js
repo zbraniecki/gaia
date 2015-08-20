@@ -46,32 +46,33 @@ module.exports = View.extend({
     this.el.setAttribute('role', 'option');
     // The only way to exclude content from :before element (present in setting
     // item) is to override it with ARIA label.
-    this.l10n.setAttributes(this.el, 'setting-option-' + data.title, {
-      value: this.localizeValue(data)
+    this.l10n.formatValue(data.value).then((value) => {
+      this.l10n.setAttributes(this.el, 'setting-option-' + data.title, {
+        value: value
+      });
+    }).then(() => {
+      this.el.innerHTML = this.template(data);
+
+      if (data.optionsLocalizable === false) {
+        this.el.querySelector('.setting_value').textContent = data.value;
+      } else {
+        this.el.querySelector('.setting_value').setAttribute('data-l10n-id',
+          data.value);
+      }
+
+      // Clean up
+      delete this.template;
+
+      debug('rendered (item %s)', data.key);
     });
 
-    this.el.innerHTML = this.template(data);
-
-    // Clean up
-    delete this.template;
-
-    debug('rendered (item %s)', data.key);
     return this;
-  },
-
-  localizeValue: function(data) {
-    // some data items are not to be localized
-    if (data.optionsLocalizable === false) {
-      return data.value;
-    } else {
-      return this.l10n.get(data.value);
-    }
   },
 
   template: function(data) {
     return '<div class="setting_text">' +
-      '<h4 class="setting_title" data-l10n-id="' + data.title + '"></h4>' +
-      '<h5 class="setting_value">' + this.localizeValue(data) + '</h5>' +
+      '<h4 class="setting_title"></h4>' +
+      '<h5 class="setting_value"></h5>' +
     '</div>';
   },
 });

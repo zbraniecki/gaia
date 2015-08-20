@@ -83,12 +83,6 @@ BatteryController.prototype.notifications = {
 BatteryController.prototype.updateStatus = function () {
   var previous = this.app.get('batteryStatus');
   var current = this.getStatus(this.battery);
-  // We need the app to be first localized
-  // before showing the battery status message
-  if (!this.app.localized()) {
-    this.app.on('localized', this.updateStatus);
-    return;
-  }
   if (current !== previous) {
     this.app.set('batteryStatus', current);
   }
