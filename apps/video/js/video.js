@@ -401,9 +401,6 @@ function showInfoView() {
   //Get the length of the playing video
   var length = isFinite(currentVideo.metadata.duration) ?
       MediaUtils.formatDuration(currentVideo.metadata.duration) : '';
-  //Get the video size
-  var size = isFinite(currentVideo.size) ?
-      MediaUtils.formatSize(currentVideo.size) : '';
   //Check if video type has prefix 'video/' e.g. video/mp4
   var type = currentVideo.type;
   if (type) {
@@ -415,23 +412,29 @@ function showInfoView() {
   var resolution = (currentVideo.metadata.width &&
       currentVideo.metadata.height) ? currentVideo.metadata.width + 'x' +
       currentVideo.metadata.height : '';
-  //Create data object to fill in the fields of info overlay view
-  var data = {
-    'info-name': currentVideo.metadata.title,
-    'info-length': length,
-    'info-size': size,
-    'info-type': type,
-    'info-date': MediaUtils.formatDate(currentVideo.date),
-    'info-resolution': resolution
-  };
+  //Get the video size
+  MediaUtils.getLocalizedSizeTokens(currentVideo.size).then((args) => {
+    //Create data object to fill in the fields of info overlay view
+    var data = {
+      'info-name': {raw: currentVideo.metadata.title},
+      'info-length': {raw: length},
+      'info-size': {
+        id: 'fileSize',
+        args: args
+      },
+      'info-type': {raw: type},
+      'info-date': {raw: MediaUtils.formatDate(currentVideo.date)},
+      'info-resolution': {raw: resolution}
+    };
 
-  //Populate info overlay view
-  MediaUtils.populateMediaInfo(data);
-  // We need to disable NFC sharing when showing info view
-  setNFCSharing(false);
-  //Show the video info view
-  dom.infoView.classList.remove('hidden');
-  document.body.classList.add('info-view');
+    //Populate info overlay view
+    MediaUtils.populateMediaInfo(data);
+    // We need to disable NFC sharing when showing info view
+    setNFCSharing(false);
+    //Show the video info view
+    dom.infoView.classList.remove('hidden');
+    document.body.classList.add('info-view');
+  });
 }
 
 function hideInfoView() {
@@ -510,8 +513,10 @@ function clearSelection() {
   selectedFileNamesToBlobs = {};
   setDisabled(dom.thumbnailsDeleteButton, true);
   setDisabled(dom.thumbnailsShareButton, true);
-  dom.thumbnailsNumberSelected.textContent =
-    navigator.mozL10n.get('number-selected2', { n: 0 });
+  navigator.mozL10n.setAttributes(
+    dom.thumbnailsNumberSelected,
+    'number-selected2',
+    { n: 0 });
 }
 
 // When we enter thumbnail selection mode, or when the selection changes
@@ -543,8 +548,10 @@ function updateSelection(videodata) {
 
   // Now update the UI based on the number of selected thumbnails
   var numSelected = selectedFileNames.length;
-  dom.thumbnailsNumberSelected.textContent =
-    navigator.mozL10n.get('number-selected2', { n: numSelected });
+  navigator.mozL10n.setAttributes(
+    dom.thumbnailsNumberSelected,
+    'number-selected2',
+    { n: numSelected });
 
   var noneSelected = numSelected === 0;
   setDisabled(dom.thumbnailsDeleteButton, noneSelected);
@@ -561,8 +568,9 @@ function launchCameraApp() {
 
   a.onerror = function() {
     if (a.error.name === 'NO_PROVIDER') {
-      var msg = navigator.mozL10n.get('share-noprovider');
-      alert(msg);
+      navigator.mozL10n.formatValue('share-noprovider').then((msg) => {
+        alert(msg);
+      });
     } else {
       console.warn('share activity error:', a.error.name);
     }
@@ -686,8 +694,9 @@ function share(blobs) {
 
   a.onerror = function() {
     if (a.error.name === 'NO_PROVIDER') {
-      var msg = navigator.mozL10n.get('share-noprovider');
-      alert(msg);
+      navigator.mozL10n.formatValue('share-noprovider').then((msg) => {
+        alert(msg);
+      });
     } else {
       console.warn('share activity error:', a.error.name);
     }

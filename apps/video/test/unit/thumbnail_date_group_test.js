@@ -7,7 +7,6 @@
 
 require('/shared/js/sanitizer.js');
 require('/shared/js/l10n.js');
-require('/shared/js/l10n_date.js');
 require('/shared/js/media/media_utils.js');
 require('/shared/test/unit/mocks/mock_l10n.js');
 requireApp('/video/test/unit/mock_thumbnail_item.js');

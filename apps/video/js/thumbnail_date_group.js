@@ -64,12 +64,7 @@ function ThumbnailDateGroup(item) {
   this.container = domNode.querySelector('.thumbnail-group-container');
   this.header = domNode.querySelector('.thumbnail-group-header');
 
-  // Localize the date header if L10N is ready. Otherwise,
-  // ThumbnailList.localize will call localize when the it becomes
-  // ready or when the locale changes.
-  if (navigator.mozL10n.readyState === 'complete') {
-    this.localize();
-  }
+  this.localize();
 }
 
 // static functions
@@ -149,14 +144,16 @@ ThumbnailDateGroup.prototype.removeItem = function(thumbnail) {
   this.container.removeChild(thumbnail.htmlNode);
 };
 
-ThumbnailDateGroup.formatter = new navigator.mozL10n.DateTimeFormat();
+ThumbnailDateGroup.formatter = new Intl.DateTimeFormat(navigator.languages, {
+  month: 'long',
+  year: 'numeric',
+});
 
 ThumbnailDateGroup.prototype.localize = function() {
   // Localize the date header for this group
   var date = new Date(this.date);
-  var format = navigator.mozL10n.get('date-group-header');
-  var formattedDate = ThumbnailDateGroup.formatter.localeFormat(date, format);
-  this.header.textContent = formattedDate;
+
+  this.header.textContent = ThumbnailDateGroup.formatter.format(date);
 
   // Then localize the thumbnails in the group.
   this.thumbnails.forEach(function(thumbnail) { thumbnail.localize(); });

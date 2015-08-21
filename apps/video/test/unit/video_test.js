@@ -17,7 +17,6 @@
 
 require('/shared/js/lazy_loader.js');
 require('/shared/js/l10n.js');
-require('/shared/js/l10n_date.js');
 require('/shared/js/media/media_utils.js');
 require('/shared/test/unit/load_body_html_helper.js');
 require('/shared/test/unit/mocks/mock_lazy_loader.js');
