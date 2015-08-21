@@ -135,9 +135,6 @@ apps/system/test/unit/settings_migrator_test.js
 apps/system/test/unit/device_storage_watcher_test.js
 apps/system/test/unit/updatable_test.js
 apps/verticalhome/test/marionette/lib/verticalhome.js
-apps/video/js/thumbnail_date_group.js
-apps/video/js/video.js
-apps/video/js/view.js
 apps/wappush/js/cp_screen_helper.js
 apps/wappush/js/si_sl_screen_helper.js
 apps/wappush/js/utils.js
@@ -152,7 +149,6 @@ shared/js/dialer/keypad.js
 shared/js/dialer/utils.js
 shared/js/l10n_date.js
 shared/js/media/media_frame.js
-shared/js/media/media_utils.js
 shared/js/media/video_player.js
 shared/js/stk_helper.js
 shared/js/tz_select.js
