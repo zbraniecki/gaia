@@ -7,9 +7,7 @@ var AudioManager = require('audio_manager');
 var FormButton = require('form_button');
 var Sounds = require('sounds');
 var Utils = require('utils');
-var mozL10n = require('l10n');
 var Panel = require('panel');
-var _ = mozL10n.get;
 var html = require('text!panels/alarm_edit/panel.html');
 var constants = require('constants');
 
@@ -56,7 +54,7 @@ var AlarmEdit = function() {
       var splitValue = value.split(':');
       date.setHours(splitValue[0]);
       date.setMinutes(splitValue[1]);
-      return Utils.getLocalizedTimeText(date);
+      return { raw: Utils.getLocalizedTimeText(date) };
     }.bind(this)
   });
   this.buttons.repeat = new FormButton(this.selects.repeat, {
@@ -73,7 +71,7 @@ var AlarmEdit = function() {
   this.buttons.snooze = new FormButton(this.selects.snooze, {
     id: 'snooze-menu',
     formatLabel: function(snooze) {
-      return _('nMinutes', {n: snooze});
+      return { id: 'nMinutes', args: {n: snooze} };
     }
   });
 
@@ -90,7 +88,7 @@ var AlarmEdit = function() {
 
   // When the language changes, the value of 'weekStartsOnMonday'
   // might change.
-  mozL10n.ready(this.updateL10n.bind(this));
+  navigator.mozL10n.ready(this.updateL10n.bind(this));
 
   this.headers.header.addEventListener('action', handleDomEvent);
   this.buttons.done.addEventListener('click', handleDomEvent);
@@ -135,15 +133,17 @@ Utils.extend(AlarmEdit.prototype, {
   updateL10n: function() {
     // Move the weekdays around to properly account for whether the
     // week starts on Sunday or Monday.
-    var weekStartsOnMonday = parseInt(_('weekStartsOnMonday'), 10);
-    var parent = this.sundayListItem.parentElement;
-    if (weekStartsOnMonday) {
-      // Sunday gets moved to the end.
-      parent.appendChild(this.sundayListItem);
-    } else {
-      // Sunday goes first.
-      parent.insertBefore(this.sundayListItem, parent.firstChild);
-    }
+    navigator.mozL10n.formatValue('weekStartsOnMonday', (value) => {
+      var weekStartsOnMonday = parseInt(value, 10);
+      var parent = this.sundayListItem.parentElement;
+      if (weekStartsOnMonday) {
+        // Sunday gets moved to the end.
+        parent.appendChild(this.sundayListItem);
+      } else {
+        // Sunday goes first.
+        parent.insertBefore(this.sundayListItem, parent.firstChild);
+      }
+    });
   },
 
   // The name `handleEvent` is already defined by the Panel class, so this

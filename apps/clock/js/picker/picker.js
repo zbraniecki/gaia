@@ -1,7 +1,6 @@
 define(function(require) {
   'use strict';
   var Spinner = require('picker/spinner');
-  var _ = require('l10n').get;
   /**
    * Picker
    *
@@ -25,11 +24,6 @@ define(function(require) {
    *       range: [0, 60],
    *       isPadded: true,
    *       valueText: 'nSpinnerMinutes'
-   *     },
-   *     seconds: {
-   *       range: [0, 60],
-   *       isPadded: true,
-   *       valueText: 'nSpinnerSeconds'
    *     }
    *   }
    * });
@@ -50,16 +44,19 @@ define(function(require) {
       this.nodes[picker] = setup.element.querySelector('.picker-' + picker);
 
       for (var i = range[0]; i <= range[1]; i++) {
-        values.push(isPadded && i < 10 ? '0' + i : '' + i);
+        var value = isPadded && i < 10 ? '0' + i : '' + i;
+        values.push(value);
         if (valueText) {
-          textValues.push(_(valueText, { n: i }));
+          textValues.push({id: valueText, args: { n: i }});
+        } else {
+          textValues.push({raw: value });
         }
       }
 
       this.spinners[picker] = new Spinner({
         element: this.nodes[picker],
         values: values,
-        textValues: textValues.length ? textValues : values
+        textValues: textValues
       });
     }, this);
   }

@@ -5,7 +5,6 @@ define(function(require) {
   var Stopwatch = require('stopwatch');
   var Utils = require('utils');
   var Template = require('template');
-  var mozL10n = require('l10n');
   var html = require('text!panels/stopwatch/panel.html');
   var lapHtml = require('text!panels/stopwatch/list_item.html');
   var priv = new WeakMap();
@@ -217,7 +216,7 @@ define(function(require) {
       time: Utils.format.durationMs(time)
     });
     li.innerHTML = html;
-    mozL10n.setAttributes(
+    navigator.mozL10n.setAttributes(
       li.querySelector('.lap-name'),
       'lap-number',
       { n: num }
@@ -228,7 +227,7 @@ define(function(require) {
   function updateLapDom(num, time, li) {
     li.querySelector('.lap-duration').textContent =
       Utils.format.durationMs(time);
-    mozL10n.setAttributes(
+    navigator.mozL10n.setAttributes(
       li.querySelector('.lap-name'),
       'lap-number',
       { n: num }

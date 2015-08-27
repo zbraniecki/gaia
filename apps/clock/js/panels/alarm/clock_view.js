@@ -4,7 +4,6 @@ define(function(require) {
 var asyncStorage = require('shared/js/async_storage');
 var Utils = require('utils');
 var SETTINGS_CLOCKMODE = 'settings_clockoptions_mode';
-var mozL10n = require('l10n');
 var viewMode = null;
 
 // Retrieve stored view mode data as early as possible.
@@ -116,19 +115,24 @@ var ClockView = {
 
   updateDayDate: function cv_updateDayDate() {
     var d = new Date();
-    var f = new mozL10n.DateTimeFormat();
-    var format = mozL10n.get('dateFormat');
+    //XXX: dateFormat = %A, %B %e
+    var f = Intl.DateTimeFormat(navigator.languages, {
+      year: 'numeric',
+      month: 'numeric'
+    });
 
     // If the date of the month is part of the locale format as a
     // number, insert bold tags to accentuate the number itself. %d
     // and %e are strings that represent the day of the month (1-31).
-    format = format.replace(/(%d|%e)/g, '<b>$1</b>');
+    //format = format.replace(/(%d|%e)/g, '<b>$1</b>');
 
     var remainMillisecond = (24 - d.getHours()) * 3600 * 1000 -
                             d.getMinutes() * 60 * 1000 -
                             d.getMilliseconds();
 
-    this.dayDate.innerHTML = f.localeFormat(d, format);
+    var dateString = f.format(d);
+    //XXX: we have to wrap it in <b> here
+    this.dayDate.innerHTML = dateString;
 
     this.timeouts.dayDate = setTimeout(
       this.updateDayDate.bind(this), remainMillisecond

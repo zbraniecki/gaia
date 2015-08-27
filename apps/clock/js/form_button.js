@@ -91,7 +91,16 @@ FormButton.prototype = {
    */
   refresh: function() {
     var value = this.value;
-    this.button.textContent = this.formatLabel(value);
+    return this.formatLabel(value).then((l10nId) => {
+      if (typeof l10nId === 'string') {
+        this.button.setAttribute('data-l10n0id', l10nId);
+      } else if (l10nId.raw) {
+        this.button.removeAttribute('data-l10n-id');
+        this.button.textContent = l10nId.raw;
+      } else {
+        navigator.mozL10n.setAttributes(this.button, l10nId.id, l10nId.args);
+      }
+    });
   },
 
   /**

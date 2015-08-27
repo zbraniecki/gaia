@@ -4,7 +4,6 @@ define(function(require) {
 var Banner = require('banner/main');
 var alarmDatabase = require('alarm_database');
 var Utils = require('utils');
-var _ = require('l10n').get;
 var App = require('app');
 var alarmTemplate = require('tmpl!panels/alarm/list_item.html');
 var AsyncQueue = require('async_queue');
@@ -100,10 +99,17 @@ AlarmListPanel.prototype = {
     link.dataset.id = alarm.id;
 
     li.querySelector('.time').innerHTML = Utils.getLocalizedTimeHtml(d);
-    li.querySelector('.label').textContent = alarm.label || _('alarm');
-    li.querySelector('.repeat').textContent =
-      (alarm.isRepeating() ? Utils.summarizeDaysOfWeek(alarm.repeat) : '');
-
+    if (alarm.label) {
+      li.querySelector('.label').removeAttribute('data-l10n-id');
+      li.querySelector('.label').textContent = alarm.label;
+    } else {
+      li.querySelector('.label').setAttribute('data-l10n-id', 'alarm');
+    }
+    if (alarm.isRepeating()) {
+      Utils.summarizeDaysOfWeek(alarm.repeat).then((string) => {
+        li.querySelector('.repeat').textContent = string;
+      });
+    }
     return li;
   },
 

@@ -3,7 +3,6 @@ define(function(require) {
 
   var Template = require('template');
   var Utils = require('utils');
-  var mozL10n = require('l10n');
   var html = require('text!banner/banner.html');
 
   function Banner(node) {
@@ -25,7 +24,7 @@ define(function(require) {
     constructor: Banner,
 
     render: function bn_render(alarmTime) {
-      var timeLeft, tl, countdownType, localTimes, unitObj;
+      var timeLeft, tl, countdownType, localTimes;
 
       timeLeft = +alarmTime - Date.now();
       // generate human readable numbers to pass to localization function
@@ -39,41 +38,33 @@ define(function(require) {
       if (tl.days) {
         //countdown-moreThanADay localized only for en-US while 913466 is open
         countdownType = 'countdown-moreThanADay';
-        localTimes = [
-          ['days', 'nRemainDays', tl.days],
-          ['hours', 'nAndRemainHours', tl.hours]
-        ];
+        localTimes = {
+          'days': tl.days,
+          'hours': tl.hours
+        };
       } else if (tl.hours > 0) {
         countdownType = 'countdown-moreThanAnHour';
-        localTimes = [
-          ['hours', 'nHours', tl.hours],
-          ['minutes', 'nRemainMinutes', tl.minutes]
-        ];
+        localTimes = {
+          'hours': tl.hours,
+          'minutes': tl.minutes
+        };
       } else {
         countdownType = 'countdown-lessThanAnHour';
-        localTimes = [
-          ['minutes', 'nMinutes', tl.minutes]
-        ];
+        localTimes = {
+          'minutes': tl.minutes
+        };
       }
 
-      // Create an object to pass to mozL10n.get
-      // e.g. {minutes: mozL10n.get('nMinutes', {n: 3})}
-      unitObj = localTimes.reduce(function(lcl, time) {
-        lcl[time[0]] = mozL10n.get(time[1], {n: time[2]});
-        return lcl;
-      }, {});
-
-      // mozL10n.get interpolates the units in unitObj inside the
-      // localization string for countdownType
-      return mozL10n.get(countdownType, unitObj);
+      return {
+        noticeId: countdownType,
+        noticeArgs: localTimes
+      };
     },
 
     show: function bn_show(alarmTime) {
       // Render the Banner notice
       this.notice.innerHTML = this.tmpl.interpolate(
-        {notice: this.render(alarmTime)},
-        // Localization strings contain <strong> tags
-        {safe: ['notice']}
+        this.render(alarmTime)
       );
       // 'visible' class controls the animation
       this.notice.classList.add('visible');

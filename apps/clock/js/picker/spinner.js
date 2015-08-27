@@ -119,7 +119,16 @@ define(function(require) {
     this.container.setAttribute('aria-valuemax', this.upper);
     this.container.setAttribute('aria-valuemin', this.lower);
     this.container.setAttribute('aria-valuenow', this.index);
-    this.container.setAttribute('aria-valuetext', this.textValues[this.index]);
+    if (this.textValues[this.index].raw) {
+      this.container.setAttribute('aria-valuetext',
+        this.textValues[this.index].raw);
+    } else {
+      navigator.mozL10n.setAttributes(
+        this.container,
+        this.textValues[this.index].id,
+        this.textValues[this.index].args
+      );
+    }
 
     this.reset();
 

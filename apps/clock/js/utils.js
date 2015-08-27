@@ -1,7 +1,6 @@
 define(function(require) {
 'use strict';
 
-var mozL10n = require('l10n');
 var constants = require('constants');
 
 var Utils = {};
@@ -192,19 +191,25 @@ Utils.escapeHTML = function(str, escapeQuotes) {
 };
 
 Utils.getLocalizedTimeHtml = function(date) {
-  var f = new mozL10n.DateTimeFormat();
-  var shortFormat = window.navigator.mozHour12 ?
-        mozL10n.get('shortTimeFormat12') :
-        mozL10n.get('shortTimeFormat24');
-  return f.localeFormat(date, shortFormat.replace('%p', '<small>%p</small>'));
+  var f = Intl.DateTimeFormat(navigator.languages, {
+    hour12: navigator.mozHour12,
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric'
+  });
+  var string = f.format(date);
+  //XXX: <small> around second
+  return string;
 };
 
 Utils.getLocalizedTimeText = function(date) {
-  var f = new mozL10n.DateTimeFormat();
-  var shortFormat = window.navigator.mozHour12 ?
-        mozL10n.get('shortTimeFormat12') :
-        mozL10n.get('shortTimeFormat24');
-  return f.localeFormat(date, shortFormat);
+  var f = Intl.DateTimeFormat(navigator.languages, {
+    hour12: navigator.mozHour12,
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric'
+  });
+  return f.format(date);
 };
 
 Utils.changeSelectByValue = function(selectElement, value) {
@@ -574,34 +579,40 @@ Utils.summarizeDaysOfWeek = function(repeat) {
     }
   }
 
-  var _ = mozL10n.get;
   if (days.length === 7) {
-    return _('everyday');
+    return Promise.resolve('everyday');
   } else if (days.length === 5 &&
              days.indexOf('saturday') === -1 &&
              days.indexOf('sunday') === -1) {
-    return _('weekdays');
+    return Promise.resolve('weekdays');
   } else if (days.length === 2 &&
              days.indexOf('saturday') !== -1 &&
              days.indexOf('sunday') !== -1) {
-    return _('weekends');
+    return Promise.resolve('weekends');
   } else if (days.length === 0) {
-    return _('never');
+    return Promise.resolve('never');
   } else {
-    var weekStartsOnMonday = parseInt(_('weekStartsOnMonday'), 10);
-    var allDays = (weekStartsOnMonday ?
-                   constants.DAYS_STARTING_MONDAY :
-                   constants.DAYS_STARTING_SUNDAY);
+    return navigator.mozL10n.formatValue('weekStartsOnMonday').then(
+      (value) => {
+      var weekStartsOnMonday = parseInt(value, 10);
+      var allDays = (weekStartsOnMonday ?
+                     constants.DAYS_STARTING_MONDAY :
+                     constants.DAYS_STARTING_SUNDAY);
 
-    var repeatStrings = [];
-    allDays.forEach(function(day, idx) {
-      if (days.indexOf(day) !== -1) {
-        repeatStrings.push(_(constants.DAY_STRING_TO_L10N_ID[day]));
-      }
+      var repeatStrings = [];
+      allDays.forEach(function(day, idx) {
+        if (days.indexOf(day) !== -1) {
+          repeatStrings.push(
+            navigator.mozL10n.formatValue(
+              constants.DAY_STRING_TO_L10N_ID[day]));
+        }
+      });
+
+      // TODO: Use a localized separator.
+      return Promise.all(repeatStrings).then((values) => {
+        return window.mozIntl.formatList(values);
+      });
     });
-
-    // TODO: Use a localized separator.
-    return repeatStrings.join(', ');
   }
 };
 
