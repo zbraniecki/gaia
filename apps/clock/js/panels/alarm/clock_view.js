@@ -1,5 +1,6 @@
 define(function(require) {
 'use strict';
+ /* global mozIntl */
 
 var asyncStorage = require('shared/js/async_storage');
 var Utils = require('utils');
@@ -115,23 +116,24 @@ var ClockView = {
 
   updateDayDate: function cv_updateDayDate() {
     var d = new Date();
-    //XXX: dateFormat = %A, %B %e
-    var f = Intl.DateTimeFormat(navigator.languages, {
-      year: 'numeric',
-      month: 'numeric'
+    var f = mozIntl.DateTimeFormat(navigator.languages, {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      format: {
+        day: '<b>$&</b>'
+      }
     });
 
     // If the date of the month is part of the locale format as a
     // number, insert bold tags to accentuate the number itself. %d
     // and %e are strings that represent the day of the month (1-31).
-    //format = format.replace(/(%d|%e)/g, '<b>$1</b>');
 
     var remainMillisecond = (24 - d.getHours()) * 3600 * 1000 -
                             d.getMinutes() * 60 * 1000 -
                             d.getMilliseconds();
 
     var dateString = f.format(d);
-    //XXX: we have to wrap it in <b> here
     this.dayDate.innerHTML = dateString;
 
     this.timeouts.dayDate = setTimeout(

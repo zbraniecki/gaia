@@ -1,5 +1,5 @@
 'use strict';
-/* global KeyEvent */
+/* global KeyEvent, mozIntl */
 define(function(require) {
 var Alarm = require('alarm');
 var ClockView = require('panels/alarm/clock_view');
@@ -86,7 +86,7 @@ var AlarmEdit = function() {
     this.element.scrollTop = 0;
   }.bind(this));
 
-  // When the language changes, the value of 'weekStartsOnMonday'
+  // When the language changes, the value of 'firstDayOfTheWeek'
   // might change.
   navigator.mozL10n.ready(this.updateL10n.bind(this));
 
@@ -133,8 +133,8 @@ Utils.extend(AlarmEdit.prototype, {
   updateL10n: function() {
     // Move the weekdays around to properly account for whether the
     // week starts on Sunday or Monday.
-    navigator.mozL10n.formatValue('weekStartsOnMonday', (value) => {
-      var weekStartsOnMonday = parseInt(value, 10);
+    mozIntl.calendarInfo('firstDayOfTheWeek').then(firstDay => {
+      var weekStartsOnMonday = parseInt(firstDay, 10) === 1;
       var parent = this.sundayListItem.parentElement;
       if (weekStartsOnMonday) {
         // Sunday gets moved to the end.

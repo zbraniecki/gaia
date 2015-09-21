@@ -1,5 +1,6 @@
 define(function(require) {
 'use strict';
+/* global mozIntl */
 
 var constants = require('constants');
 
@@ -191,14 +192,16 @@ Utils.escapeHTML = function(str, escapeQuotes) {
 };
 
 Utils.getLocalizedTimeHtml = function(date) {
-  var f = Intl.DateTimeFormat(navigator.languages, {
+  var f = mozIntl.DateTimeFormat(navigator.languages, {
     hour12: navigator.mozHour12,
     hour: 'numeric',
     minute: 'numeric',
-    second: 'numeric'
+    second: 'numeric',
+    format: {
+      dayperiod: '<small>$&</small>'
+    }
   });
   var string = f.format(date);
-  //XXX: <small> around second
   return string;
 };
 
@@ -592,9 +595,9 @@ Utils.summarizeDaysOfWeek = function(repeat) {
   } else if (days.length === 0) {
     return Promise.resolve('never');
   } else {
-    return navigator.mozL10n.formatValue('weekStartsOnMonday').then(
-      (value) => {
-      var weekStartsOnMonday = parseInt(value, 10);
+    return mozIntl.calendarInfo('firstDayOfTheWeek').then(
+      (firstDay) => {
+      var weekStartsOnMonday = parseInt(firstDay, 10) === 1;
       var allDays = (weekStartsOnMonday ?
                      constants.DAYS_STARTING_MONDAY :
                      constants.DAYS_STARTING_SUNDAY);
@@ -610,7 +613,7 @@ Utils.summarizeDaysOfWeek = function(repeat) {
 
       // TODO: Use a localized separator.
       return Promise.all(repeatStrings).then((values) => {
-        return window.mozIntl.formatList(values);
+        return mozIntl.formatList(values);
       });
     });
   }
