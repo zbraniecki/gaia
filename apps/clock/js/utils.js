@@ -194,9 +194,9 @@ Utils.escapeHTML = function(str, escapeQuotes) {
 Utils.getLocalizedTimeHtml = function(date) {
   var f = mozIntl.DateTimeFormat(navigator.languages, {
     hour12: navigator.mozHour12,
+    dayperiod: true,
     hour: 'numeric',
     minute: 'numeric',
-    second: 'numeric',
     format: {
       dayperiod: '<small>$&</small>'
     }
@@ -613,7 +613,7 @@ Utils.summarizeDaysOfWeek = function(repeat) {
 
       // TODO: Use a localized separator.
       return Promise.all(repeatStrings).then((values) => {
-        return mozIntl.formatList(values);
+        return { raw: mozIntl.formatList(values) };
       });
     });
   }

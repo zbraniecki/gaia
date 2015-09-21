@@ -91,7 +91,10 @@ FormButton.prototype = {
    */
   refresh: function() {
     var value = this.value;
-    return this.formatLabel(value).then((l10nId) => {
+    var formatLabelPromise = this.formatLabel.then ?
+      this.formatLabel(value) : Promise.resolve(this.formatlabel(value));
+
+    return formatLabelPromise.then((l10nId) => {
       if (typeof l10nId === 'string') {
         this.button.setAttribute('data-l10n0id', l10nId);
       } else if (l10nId.raw) {
@@ -167,7 +170,7 @@ FormButton.prototype = {
    *
    */
   formatLabel: function(value) {
-    return value;
+    return {raw: value};
   },
 
   /**

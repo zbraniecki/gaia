@@ -106,8 +106,12 @@ AlarmListPanel.prototype = {
       li.querySelector('.label').setAttribute('data-l10n-id', 'alarm');
     }
     if (alarm.isRepeating()) {
-      Utils.summarizeDaysOfWeek(alarm.repeat).then((string) => {
-        li.querySelector('.repeat').textContent = string;
+      Utils.summarizeDaysOfWeek(alarm.repeat).then(l10nId => {
+        if (typeof l10nId === 'string') {
+          li.querySelector('.repeat').setAttribute('data-l10n-id', l10nId);
+        } else if (l10nId.raw) {
+          li.querySelector('.repeat').textContent = l10nId.raw;
+        }
       });
     }
     return li;
