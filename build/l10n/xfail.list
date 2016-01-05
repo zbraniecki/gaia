@@ -61,16 +61,11 @@ apps/system/js/accessibility.js
 apps/system/js/app_install_manager.js
 apps/system/js/bluetooth_transfer.js
 apps/system/js/browser_context_menu.js
-apps/system/js/cell_broadcast_system.js
-apps/system/js/crash_reporter.js
 apps/system/js/download/download_notification.js
 apps/system/js/ime_menu.js
 apps/system/js/keyboard_manager.js
-apps/system/js/nfc_handover_manager.js
 apps/system/js/permission_manager.js
 apps/system/js/quick_settings.js
-apps/system/js/screenshot.js
-apps/system/js/sleep_menu.js
 apps/system/js/device_storage_watcher.js
 apps/system/js/update_manager.js
 apps/system/test/unit/fxa_test/screens/fxam_signup_success_test.js
