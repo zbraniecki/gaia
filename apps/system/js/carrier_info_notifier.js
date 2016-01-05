@@ -32,11 +32,11 @@
       }
     },
 
-    show: function cin_show(message, title) {
+    show: function cin_show(messageL10n, title) {
       var showDialog = function cin_showDialog() {
         ModalDialog.showWithPseudoEvent({
           title: title,
-          text: { raw: message },
+          text: messageL10n,
           type: 'alert'
         });
       };
@@ -56,7 +56,8 @@
       var notification = NotificationScreen.addNotification({
         id: notificationId,
         title: title,
-        text: message
+        // message vs messageL10n
+        text: messageL10n
       });
       notification.addEventListener('tap', function showDialogAndDismiss() {
         showDialog();

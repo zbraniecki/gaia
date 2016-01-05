@@ -5,7 +5,6 @@
 // This file calls getElementById without waiting for an onload event, so it
 // must have a defer attribute or be included at the end of the <body>.
 var CrashReporter = (function() {
-  var _ = navigator.mozL10n.get;
   var settings = navigator.mozSettings;
   var screen = document.getElementById('screen');
 
@@ -29,11 +28,21 @@ var CrashReporter = (function() {
     if (isChrome) {
       navigator.mozL10n.setAttributes(elem, 'crash-dialog2-os');
     } else {
-      navigator.mozL10n.setAttributes(
-        elem,
-        'crash-dialog-app',
-        { name: crashedAppName || _('crash-dialog-app-noname') }
-      );
+      if (crashedAppName) {
+        navigator.mozL10n.setAttributes(
+          elem,
+          'crash-dialog-app',
+          { name: crashedAppName }
+        );
+      } else {
+        navigator.mozL10n.formatValue('crash-dialog-app-noname').then(name => {
+          navigator.mozL10n.setAttributes(
+            elem,
+            'crash-dialog-app',
+            { name }
+          );
+        });
+      }
     }
 
     // "Don't Send Report" button in dialog
@@ -83,9 +92,6 @@ var CrashReporter = (function() {
   }
 
   function showBanner(crashID, isChrome) {
-    var appName = crashedAppName || _('crash-dialog-app-noname');
-    var message = isChrome ? 'crash-banner-os2' :
-      {id: 'crash-banner-app', args: { name: appName }};
 
     var button = null;
     if (showReportButton) {
@@ -101,7 +107,18 @@ var CrashReporter = (function() {
     }
     LazyLoader.load(['js/system_banner.js']).then(() => {
       var systemBanner = new SystemBanner();
-      systemBanner.show(message, button);
+      if (crashedAppName) {
+        var appName = crashedAppName;
+        var message = isChrome ? 'crash-banner-os2' :
+          {id: 'crash-banner-app', args: { name: appName }};
+        systemBanner.show(message, button);
+      } else {
+        navigator.mozL10n.formatValue('crash-dialog-app-noname').then(name => {
+          var message = isChrome ? 'crash-banner-os2' :
+            {id: 'crash-banner-app', args: { name }};
+          systemBanner.show(message, button);
+        });
+      }
     }).catch((err) => {
       console.error(err);
     });

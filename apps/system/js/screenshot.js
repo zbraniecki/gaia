@@ -240,30 +240,32 @@
     /**
      * Display a screenshot success or failure notification.
      * Localize the first argument, and localize the third if the second is null
-     * @param  {String} titleid  l10n ID of the string to show.
+     * @param  {String} titleL10n  l10n ID of the string to show.
      * @param  {String} body     Label to show as body, or null.
-     * @param  {String} bodyid   l10n ID of the label to show as body.
+     * @param  {String} bodyL10n   l10n ID of the label to show as body.
      * @param  {String} onClick  Optional handler if the notification is clicked
      * @memberof Screenshot.prototype
      */
-    _notify: function notify(titleid, body, bodyid, onClick) {
-      var title = navigator.mozL10n.get(titleid) || titleid;
-      body = body || navigator.mozL10n.get(bodyid);
-      var notification = new window.Notification(title, {
-        body: body,
+    _notify: function notify(titleL10n, body, bodyL10n, onClick) {
+      var options = {
         icon: '/style/icons/Gallery.png',
         tag: 'screenshot:' + (new Date().getTime()),
         data: {
           systemMessageTarget: 'screenshot'
         }
-      });
-
-      notification.onclick = function() {
-        notification.close();
-        if (onClick) {
-          onClick();
-        }
       };
+      if (body) {
+        options.body = body;
+      } else {
+        options.bodyL10n = bodyL10n;
+      }
+      window.NotificationHelper.send(titleL10n, options).then(notification => {
+        if (onClick) {
+          notification.onclick = () => {
+            onClick();
+          };
+        }
+      });
     }
   };
 
